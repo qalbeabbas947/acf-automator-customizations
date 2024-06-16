@@ -35,8 +35,9 @@ class ACF_AUTOMATOR_INTEGRATION {
             self::$instance = new self;
 
             self::$instance->setup_constants();
-            self::$instance->hooks();
             self::$instance->includes();
+            self::$instance->hooks();
+            
         }
 
         return self::$instance;
@@ -71,7 +72,12 @@ class ACF_AUTOMATOR_INTEGRATION {
     /**
      * Plugin requiered files
      */
-    public function includes() {}
+    public function includes() {
+
+        require_once AAI_INCLUDES_DIR.'acf-users-integration.php';
+        require_once AAI_INCLUDES_DIR.'acf-users-tokens.php';
+        require_once AAI_INCLUDES_DIR.'acf-users-action.php';
+    }
 
     /**
      * Plugin Hooks
@@ -93,10 +99,8 @@ class ACF_AUTOMATOR_INTEGRATION {
             return;
         }
     
-        
-        require_once AAI_INCLUDES_DIR.'acf-users-integration.php';
-        new ACF_USERS_Integration();
-        new Send_Email_Sample();
+         new ACF_USERS_Integration();
+        new ac_automator_email_action();
     }
     
     /**
