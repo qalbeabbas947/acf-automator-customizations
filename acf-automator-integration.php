@@ -38,7 +38,7 @@ class ACF_AUTOMATOR_INTEGRATION {
             self::$instance->includes();
             self::$instance->hooks();
             
-        }
+        } 
 
         return self::$instance;
     }
@@ -77,6 +77,8 @@ class ACF_AUTOMATOR_INTEGRATION {
         require_once AAI_INCLUDES_DIR.'acf-users-integration.php';
         require_once AAI_INCLUDES_DIR.'acf-users-tokens.php';
         require_once AAI_INCLUDES_DIR.'acf-users-action.php';
+
+        
     }
 
     /**
@@ -85,12 +87,6 @@ class ACF_AUTOMATOR_INTEGRATION {
     public function hooks() {
 
         add_action( 'automator_add_integration', [ $this, 'integration_load_files' ],9999 );
-
-        add_action( 'admin_menu', [ $this, 'aai_add_menu_page' ] );
-        //add_action( 'init', [ $this, 'aai_selected_users' ] );
-        add_action( 'admin_enqueue_scripts', [ $this, 'aai_enqueue_scripts' ] );
-        //add_action( 'wp_ajax_acf_automator_email_list', [ $this, 'acf_automator_email_list' ], 100 );
-        
     }
 
     function integration_load_files() {
@@ -99,7 +95,7 @@ class ACF_AUTOMATOR_INTEGRATION {
             return;
         }
     
-         new ACF_USERS_Integration();
+        new ACF_USERS_Integration();
         new ac_automator_email_action();
     }
     
@@ -132,105 +128,6 @@ class ACF_AUTOMATOR_INTEGRATION {
         
         exit;
     }
-    /**
-     * add backend js file
-     */
-    public function aai_enqueue_scripts() {
-
-        $rand = rand( 1000000, 1000000000 );
-        wp_enqueue_script( 'admin-js', AAI_ASSETS_URL .'js/backend.js', [ 'jquery' ], $rand, true );
-    }
-
-    /**
-     * get select users
-     */ 
-    public function aai_selected_users() {
-
-        global $wpdb;
-        $args = array(
-            'role'    => 'handbook_manager',
-            'orderby' => 'user_nicename',
-            'order'   => 'ASC'
-        );
-
-        $user_query = new WP_User_Query($args);
-        $users = $user_query->get_results();
-        $users = array_column( $users, 'ID' );
-        
-        if( ! empty( $users ) && is_array( $users ) ) {
-            ?>
-            <div class="aai-main-wrapper" style="display: none;">
-                <select class="aai-select-box" data-post_id="<?php echo $_REQUEST['post'];?>">
-                    <?php
-                    foreach( $users as $user ) {
-                        
-                        $query = $wpdb->prepare(
-                            "SELECT display_name FROM $wpdb->users WHERE ID = %d",
-                            $user
-                        );
-                        $user_name = $wpdb->get_var($query);
-                        ?>
-                            <option value="<?php echo $user; ?>"> <?php echo ucwords( $user_name ); ?> </option>
-                        <?php
-                    }
-                    ?>
-                </select>
-            </div>
-            <?php   
-        }
-    }
-
-    /**
-     * Add menu page
-     */
-    public function aai_add_menu_page() {
-
-        add_menu_page(
-            __( 'ACF Group Users', AAI_TEXT_DOMAIN ),
-            __( 'ACF Group Users', AAI_TEXT_DOMAIN ),
-            'manage_options',
-            'aai-option',
-            [ $this, 'aai_content_cb' ]
-        );
-    }
-
-    /**
-     * menu callback function
-     */
-    public function aai_content_cb() {
-
-        global $wpdb;
-
-        $args = array(
-            'role'    => 'handbook_manager',
-            'orderby' => 'user_nicename',
-            'order'   => 'ASC'
-        );
-
-        $user_query = new WP_User_Query($args);
-        $users = $user_query->get_results();
-        $users = array_column( $users, 'ID' );
-        
-        if( ! empty( $users ) && is_array( $users ) ) {
-            ?>
-            <select>
-            <?php
-            foreach( $users as $user ) {
-                    
-                    $query = $wpdb->prepare(
-                        "SELECT display_name FROM $wpdb->users WHERE ID = %d",
-                        $user
-                    );
-                    $user_name = $wpdb->get_var($query);
-                ?>
-                <option value="<?php echo $user; ?>"> <?php echo ucwords( $user_name ); ?> </option>
-                <?php
-            }
-            ?>
-            </select>
-            <?php
-        }
-    }
 }
 
 /**
@@ -253,17 +150,14 @@ function aai_ready() {
  * @return bool
  */
 function AAI() {
+    
     if ( ! class_exists( 'ACF' ) ) {
         add_action( 'admin_notices', 'aai_ready' );
         return false;
     }
-
+    
+    copy( __DIR__.'/includes/emails-send-emails.php', __DIR__.'/../uncanny-automator/src/integrations/emails/actions/emails-send-emails.php' );
+    
     return ACF_AUTOMATOR_INTEGRATION::instance();
 }
 add_action( 'plugins_loaded', 'AAI' );
-
-/****************************/
-
-
-
- 

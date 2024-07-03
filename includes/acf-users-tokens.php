@@ -5,9 +5,12 @@ class ac_automator_email_token extends Token {
 
     private $instance_id;
 
-    function __construct( $id ) {
+	private $email_id;
+	
+    function __construct( $id , $email ) {
 
-        $this->instance_id = $id;
+        $this->instance_id 		= $id;
+		$this->email_id 		= $email;
         parent::__construct();
     }
 	/**
@@ -32,6 +35,6 @@ class ac_automator_email_token extends Token {
 	 * @return int
 	 */
 	public function parse( $replaceable, $field_text, $match, $current_user ) {
-		return $this->instance_id;
+		return $this->email_id;
 	}
 }
